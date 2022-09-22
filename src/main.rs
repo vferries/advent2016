@@ -1,5 +1,5 @@
-use advent2016::days::day2::day2;
+use advent2016::days::day3::day3;
 
 fn main() {
-    day2();
+    day3();
 }
