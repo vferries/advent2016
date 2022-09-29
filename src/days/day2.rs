@@ -23,7 +23,7 @@ fn part1(lines: Lines) -> i32 {
                 'D' => (x, min(2, y + 1)),
                 'L' => (max(0, x - 1), y),
                 'R' => (min(2, x + 1), y),
-                _ => panic!("Unexpected character !")
+                _ => panic!("Unexpected character !"),
             }
         }
         result *= 10;
@@ -43,7 +43,7 @@ fn part2(lines: Lines) -> String {
                 'D' => (x, y + 1),
                 'L' => (if x > 0 { x - 1 } else { 0 }, y),
                 'R' => (x + 1, y),
-                _ => panic!("Unknown direction")
+                _ => panic!("Unknown direction"),
             };
             (x, y) = match pad.get(&next) {
                 Some(_) => next,

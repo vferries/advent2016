@@ -15,12 +15,14 @@ pub fn day1() {
 fn parse_file() -> Vec<Instruction> {
     let content = include_str!("input/day1.txt");
     let content = content.split(", ");
-    let instructions: Vec<Instruction> = content.map(|instruction| {
-        let direction = &instruction.chars().nth(0).unwrap();
-        let steps = &instruction[1..];
-        let steps: i32 = steps.parse().unwrap();
-        Instruction::from(*direction, steps)
-    }).collect();
+    let instructions: Vec<Instruction> = content
+        .map(|instruction| {
+            let direction = &instruction.chars().nth(0).unwrap();
+            let steps = &instruction[1..];
+            let steps: i32 = steps.parse().unwrap();
+            Instruction::from(*direction, steps)
+        })
+        .collect();
     instructions
 }
 
@@ -103,10 +105,7 @@ struct Instruction {
 
 impl Instruction {
     fn from(direction: char, steps: i32) -> Self {
-        Instruction {
-            direction,
-            steps,
-        }
+        Instruction { direction, steps }
     }
 }
 
@@ -120,10 +119,10 @@ enum Direction {
 impl Direction {
     pub(crate) fn walk(&self, (x, y): (i32, i32), steps: i32) -> (i32, i32) {
         match self {
-            Direction::NORTH => { (x, y - steps) }
-            Direction::EAST => { (x + steps, y) }
-            Direction::SOUTH => { (x, y + steps) }
-            Direction::WEST => { (x - steps, y) }
+            Direction::NORTH => (x, y - steps),
+            Direction::EAST => (x + steps, y),
+            Direction::SOUTH => (x, y + steps),
+            Direction::WEST => (x - steps, y),
         }
     }
 }
@@ -131,10 +130,34 @@ impl Direction {
 impl Direction {
     fn rotate(&self, dir: char) -> Direction {
         match self {
-            Direction::NORTH => if dir == 'L' { Direction::WEST } else { Direction::EAST }
-            Direction::EAST => if dir == 'L' { Direction::NORTH } else { Direction::SOUTH }
-            Direction::SOUTH => if dir == 'L' { Direction::EAST } else { Direction::WEST }
-            Direction::WEST => if dir == 'L' { Direction::SOUTH } else { Direction::NORTH }
+            Direction::NORTH => {
+                if dir == 'L' {
+                    Direction::WEST
+                } else {
+                    Direction::EAST
+                }
+            }
+            Direction::EAST => {
+                if dir == 'L' {
+                    Direction::NORTH
+                } else {
+                    Direction::SOUTH
+                }
+            }
+            Direction::SOUTH => {
+                if dir == 'L' {
+                    Direction::EAST
+                } else {
+                    Direction::WEST
+                }
+            }
+            Direction::WEST => {
+                if dir == 'L' {
+                    Direction::SOUTH
+                } else {
+                    Direction::NORTH
+                }
+            }
         }
     }
 }
