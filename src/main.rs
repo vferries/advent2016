@@ -1,5 +1,13 @@
-use advent2016::days::day4::day4;
+use advent2016::days::day5::day5;
 
 fn main() {
-    day4();
+    use std::time::Instant;
+    let now = Instant::now();
+
+    {
+        day5();
+    }
+
+    let elapsed = now.elapsed();
+    println!("Elapsed: {:.2?}", elapsed);
 }
