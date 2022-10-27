@@ -2,7 +2,6 @@ use std::ops::Index;
 use std::str::Lines;
 
 use fancy_regex::Regex;
-use itertools::Itertools;
 
 const WIDTH: usize = 50;
 const HEIGHT: usize = 6;

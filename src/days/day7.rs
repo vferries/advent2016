@@ -1,7 +1,6 @@
 use std::str::Lines;
 
 use fancy_regex::Regex;
-use itertools::Itertools;
 
 pub fn day7() {
     println!("=== Day 7 ===");
@@ -31,7 +30,7 @@ fn supports_tls(ipv7: &str) -> bool {
         .into_iter()
         .map(contains_abba)
         .enumerate();
-    let (base, brackets): (Vec<_>, Vec<_>) = parts.partition(|(i, e_)| { i % 2 == 0 });
+    let (base, brackets): (Vec<_>, Vec<_>) = parts.partition(|(i, _)| { i % 2 == 0 });
     base.into_iter().any(|(_, b)| { b }) && brackets.into_iter().all(|(_, b)| { !b })
 }
 

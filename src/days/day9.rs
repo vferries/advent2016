@@ -1,8 +1,3 @@
-use std::ops::Index;
-use std::str::Lines;
-
-use itertools::Itertools;
-
 pub fn day9() {
     println!("=== Day 9 ===");
     println!("- Part 1");
@@ -73,7 +68,7 @@ fn decompress_v2(str: &str) -> usize {
     result
 }
 
-fn char_at(str: &str, mut i: usize) -> char {
+fn char_at(str: &str, i: usize) -> char {
     str.chars().nth(i).unwrap()
 }
 

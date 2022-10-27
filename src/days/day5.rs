@@ -56,8 +56,8 @@ fn parse_file() -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 /*
+    use super::*;
     #[test]
     fn part1_sample1() {
         assert_eq!("18f47a30", part1("abc"));
