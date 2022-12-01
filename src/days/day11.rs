@@ -1,7 +1,8 @@
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet};
 use std::hash::{Hash, Hasher};
-use std::ops::Index;
+use std::ops::{Index};
+use std::rc::Rc;
 use std::str::Lines;
 
 use fancy_regex::Regex;
@@ -52,13 +53,13 @@ fn shortest_path(floors: Floors) -> usize {
 fn parse_instructions(instructions: Lines) -> Floors {
     let chips_regex = Regex::new(r"(\S+)-compatible microchip").unwrap();
     let generators_regex = Regex::new(r"(\S+) generator").unwrap();
-    let mut floors: [HashSet<Element>; 4] = [HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new()];
+    let mut floors: [HashSet<Rc<Element>>; 4] = [HashSet::new(), HashSet::new(), HashSet::new(), HashSet::new()];
     for (index, line) in instructions.enumerate() {
         chips_regex.captures_iter(line).for_each(|capture| {
-            floors[index].insert(Chip(String::from(capture.unwrap().index(1))));
+            floors[index].insert(Rc::new(Chip(String::from(capture.unwrap().index(1)))));
         });
         generators_regex.captures_iter(line).for_each(|capture| {
-            floors[index].insert(Generator(String::from(capture.unwrap().index(1))));
+            floors[index].insert(Rc::new(Generator(String::from(capture.unwrap().index(1)))));
         });
     }
     floors
@@ -66,10 +67,10 @@ fn parse_instructions(instructions: Lines) -> Floors {
 
 pub fn part2(instructions: Lines) -> usize {
     let mut floors = parse_instructions(instructions);
-    floors[0].insert(Generator("elerium".to_string()));
-    floors[0].insert(Generator("dilithium".to_string()));
-    floors[0].insert(Chip("elerium".to_string()));
-    floors[0].insert(Chip("dilithium".to_string()));
+    floors[0].insert(Rc::new(Generator("elerium".to_string())));
+    floors[0].insert(Rc::new(Generator("dilithium".to_string())));
+    floors[0].insert(Rc::new(Chip("elerium".to_string())));
+    floors[0].insert(Rc::new(Chip("dilithium".to_string())));
     shortest_path(floors)
 }
 
@@ -130,7 +131,7 @@ impl State {
                 floors[self.elevator_pos] = floors[self.elevator_pos]
                     .clone()
                     .into_iter()
-                    .filter(|e| !inside_elevator.contains(&e))
+                    .filter(|e| !inside_elevator.contains(e))
                     .collect();
                 for elem in inside_elevator.clone() {
                     floors[self.elevator_pos - 1].insert(elem);
@@ -148,9 +149,9 @@ impl State {
         states
     }
 
-    fn compute_combinations(&self) -> Vec<HashSet<Element>> {
+    fn compute_combinations(&self) -> Vec<HashSet<Rc<Element>>> {
         let current_floor = self.floors.index(self.elevator_pos);
-        let mut combinations: Vec<HashSet<Element>> = current_floor.into_iter().map(|e| HashSet::from([e.clone()])).collect();
+        let mut combinations: Vec<HashSet<Rc<Element>>> = current_floor.into_iter().map(|e| HashSet::from([e.clone()])).collect();
         for (a, b) in current_floor.into_iter().tuple_combinations() {
             combinations.push(HashSet::from([a.clone(), b.clone()]));
         }
@@ -201,17 +202,17 @@ impl Ord for State {
     }
 }
 
-fn is_valid(floor: HashSet<Element>) -> bool {
+fn is_valid(floor: HashSet<Rc<Element>>) -> bool {
     let (chips, generators): (HashSet<_>, HashSet<_>) = floor
         .into_iter()
-        .partition_map(|elem| match elem {
-            Chip(name) => Either::Left(name),
-            Generator(name) => Either::Right(name)
+        .partition_map(|elem| match &*elem {
+            Chip(ref name) => Either::Left(name.clone()),
+            Generator(ref name) => Either::Right(name.clone())
         });
     generators.is_empty() || chips.into_iter().all(|name| generators.contains(&name))
 }
 
-type Floors = [HashSet<Element>; 4];
+type Floors = [HashSet<Rc<Element>>; 4];
 
 #[derive(Eq, PartialEq, Debug, Clone, Hash)]
 enum Element {
@@ -228,7 +229,7 @@ mod tests {
         assert_eq!(State {
             elevator_pos: 0,
             floors: [
-                HashSet::from([Generator("a".to_string()), Generator("b".to_string())]),
+                HashSet::from([Rc::new(Generator("a".to_string())), Rc::new(Generator("b".to_string()))]),
                 HashSet::new(),
                 HashSet::new(),
                 HashSet::new()],
@@ -236,7 +237,7 @@ mod tests {
         }, State {
             elevator_pos: 0,
             floors: [
-                HashSet::from([Generator("b".to_string()), Generator("a".to_string())]),
+                HashSet::from([Rc::new(Generator("b".to_string())), Rc::new(Generator("a".to_string()))]),
                 HashSet::new(),
                 HashSet::new(),
                 HashSet::new()],
@@ -245,7 +246,7 @@ mod tests {
         assert_ne!(State {
             elevator_pos: 1,
             floors: [
-                HashSet::from([Generator("a".to_string()), Generator("b".to_string())]),
+                HashSet::from([Rc::new(Generator("a".to_string())), Rc::new(Generator("b".to_string()))]),
                 HashSet::new(),
                 HashSet::new(),
                 HashSet::new()],
@@ -253,7 +254,7 @@ mod tests {
         }, State {
             elevator_pos: 0,
             floors: [
-                HashSet::from([Generator("b".to_string()), Generator("a".to_string())]),
+                HashSet::from([Rc::new(Generator("b".to_string())), Rc::new(Generator("a".to_string()))]),
                 HashSet::new(),
                 HashSet::new(),
                 HashSet::new()],
