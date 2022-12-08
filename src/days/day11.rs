@@ -13,11 +13,11 @@ use crate::days::day11::Element::{Chip, Generator};
 pub fn day11() {
     println!("=== Day 11 ===");
     println!("- Part 1");
-    let line = parse_file();
-    println!("{}", part1(line));
-    println!("- Part 2");
     //let line = parse_file();
-    //println!("{}", part2(line));
+    //println!("{}", part1(line));
+    println!("- Part 2");
+    let line = parse_file();
+    println!("{}", part2(line));
 }
 
 pub fn part1(instructions: Lines) -> usize {
@@ -107,7 +107,7 @@ impl State {
                 let mut next_floor = HashSet::new();
                 for element in floors[self.elevator_pos].clone().into_iter() {
                     if !inside_elevator.contains(&element) {
-                       next_floor.insert(element);
+                        next_floor.insert(element);
                     }
                 }
                 floors[self.elevator_pos] = next_floor;
@@ -179,10 +179,10 @@ impl PartialEq<Self> for State {
             if current_floor.len() != other_floor.len() {
                 return false;
             }
-            for e in current_floor {
-                if !other_floor.contains(e) {
-                    return false;
-                }
+            let current_chips = current_floor.into_iter().filter(|&e| { if let Chip(_) = e.as_ref() { true } else {false} }).count();
+            let other_chips = other_floor.into_iter().filter(|&e| { if let Chip(_) = e.as_ref() { true } else {false} }).count();
+            if current_chips != other_chips {
+                return false;
             }
         }
         return true;
