@@ -23,7 +23,7 @@ fn part2(instructions: Vec<Instruction>) -> i32 {
 }
 
 fn part1(instructions: Vec<Instruction>) -> i32 {
-    let mut registers = HashMap::new();
+    let registers = HashMap::new();
     execute(instructions, registers)
 }
 
