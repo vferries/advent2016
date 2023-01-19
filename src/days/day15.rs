@@ -11,18 +11,18 @@ pub fn day15() {
 }
 
 fn part1(input: &str) -> usize {
-    let discs = parseDiscs(input);
+    let discs = parse_discs(input);
     first_aligned_time(discs)
 }
 
 fn part2(input: &str) -> usize {
-    let mut discs = parseDiscs(input);
+    let mut discs = parse_discs(input);
     let additional_disc = Disc { index: discs.len() + 1, positions: 11, init: 0 };
     discs.push(additional_disc);
     first_aligned_time(discs)
 }
 
-fn parseDiscs(input: &str) -> Vec<Disc> {
+fn parse_discs(input: &str) -> Vec<Disc> {
     let discs = input.lines().map(|line| {
         Disc::new(line)
     }).collect_vec();

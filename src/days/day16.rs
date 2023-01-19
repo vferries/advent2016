@@ -1,6 +1,3 @@
-use std::ops::Index;
-
-use fancy_regex::Regex;
 use itertools::Itertools;
 
 pub fn day16() {
