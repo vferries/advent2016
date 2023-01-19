@@ -1,11 +1,11 @@
-use advent2016::days::day17::day17;
+use advent2016::days::day18::day18;
 
 fn main() {
     use std::time::Instant;
     let now = Instant::now();
 
     {
-        day17();
+        day18();
     }
 
     let elapsed = now.elapsed();
