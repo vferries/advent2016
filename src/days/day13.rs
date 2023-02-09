@@ -32,6 +32,7 @@ fn part1(input: usize, dest: Pos) -> i32 {
     panic!("Path not found")
 }
 
+#[allow(unused)]
 fn part2(input: usize) -> usize {
     let init_pos = Pos(1, 1);
     let mut to_visit = vec!((init_pos, 0));
