@@ -1,0 +1,180 @@
+extern crate pathfinding;
+
+use std::collections::BTreeMap;
+use std::hash::{Hash, Hasher};
+
+use itertools::Itertools;
+use pathfinding::prelude::astar;
+
+
+pub fn day22() {
+    let nodes = parse_file(include_str!("input/day22.txt"));
+    let result = part1(nodes);
+    println!("Part 1 = {}", result);
+    let nodes = parse_file(include_str!("input/day22.txt"));
+    let result = part2(nodes);
+    println!("Part 2 = {}", result);
+}
+
+#[derive(Debug, Hash, Clone)]
+struct Node {
+    x: usize,
+    y: usize,
+    used: usize,
+    available: usize,
+}
+
+fn parse_file(file_content: &str) -> Vec<Node> {
+    file_content.lines().skip(2).map(|line| {
+        let parts = line.split_whitespace().collect_vec();
+        let used = parts[2].trim_end_matches("T").parse().unwrap();
+        let available = parts[3].trim_end_matches("T").parse().unwrap();
+        let position = parts[0].split("-").collect_vec();
+        let x = position[1].trim_start_matches("x").parse().unwrap();
+        let y = position[2].trim_start_matches("y").parse().unwrap();
+        Node {
+            x,
+            y,
+            used,
+            available,
+        }
+    }
+    ).collect()
+}
+
+fn part1(nodes: Vec<Node>) -> usize {
+    println!("{:?}", nodes);
+    let mut count = 0;
+    for i in 0..nodes.len() {
+        for j in 0..nodes.len() {
+            if i != j && nodes[i].used <= nodes[j].available && nodes[i].used > 0 {
+                count += 1;
+            }
+        }
+    }
+    count
+}
+
+fn part2(nodes: Vec<Node>) -> usize {
+    let mut nodes_map = BTreeMap::new();
+    for node in nodes {
+        nodes_map.insert((node.x, node.y), node);
+    }
+    let max_x = nodes_map.keys().max_by(|(x1, _), (x2, _)| { x1.cmp(x2) }).unwrap().0;
+
+    let start = State {
+        nodes_map: nodes_map.clone(),
+        goal: (max_x, 0),
+    };
+
+    let option = astar(&start, |s| s.successors(), |s| h(s), |s| s.goal == (0, 0));
+    option.expect("No result found").1
+}
+
+fn h(state: &State) -> usize {
+    let goal_size = state.nodes_map.get(&state.goal).unwrap().used;
+    (state.goal.0 + state.goal.1) * 10 + state.nodes_map.iter()
+        .filter(|(_, n)| n.available >= goal_size)
+        .map(|(p, _)| state.goal.0.abs_diff(p.0) + state.goal.1.abs_diff(p.1))
+        .min().unwrap() * 5
+}
+
+fn neighbors<'a>(node: &'a Pos, nodes_map: &'a BTreeMap<Pos, Node>) -> Vec<&'a Node> {
+    let mut neighbors = Vec::new();
+    if node.0 > 0 && nodes_map.contains_key(&(node.0 - 1, node.1)) {
+        neighbors.push(nodes_map.get(&(node.0 - 1, node.1)).unwrap());
+    }
+    if node.1 > 0 && nodes_map.contains_key(&(node.0, node.1 - 1)) {
+        neighbors.push(nodes_map.get(&(node.0, node.1 - 1)).unwrap());
+    }
+    if nodes_map.contains_key(&(node.0, node.1 + 1)) {
+        neighbors.push(nodes_map.get(&(node.0, node.1 + 1)).unwrap());
+    }
+    if nodes_map.contains_key(&(node.0 + 1, node.1)) {
+        neighbors.push(nodes_map.get(&(node.0 + 1, node.1)).unwrap());
+    }
+    neighbors
+}
+
+type Pos = (usize, usize);
+
+#[derive(Clone, Debug)]
+struct State {
+    nodes_map: BTreeMap<Pos, Node>,
+    goal: Pos,
+}
+
+impl State {
+    fn successors(&self) -> Vec<(Self, usize)> {
+        let mut result = Vec::new();
+        let map = &self.nodes_map;
+        for node in map.values() {
+            let pos = (node.x, node.y);
+            for neighbor in neighbors(&pos, map) {
+                if neighbor.available >= node.used && node.used > 0 {
+                    let n_pos = (neighbor.x, neighbor.y);
+                    let mut new_map = map.clone();
+                    let dest = Node {
+                        x: neighbor.x,
+                        y: neighbor.y,
+                        used: neighbor.used + node.used,
+                        available: neighbor.available - node.used,
+                    };
+                    new_map.insert(n_pos, dest);
+                    let source = Node {
+                        x: node.x,
+                        y: node.y,
+                        used: 0,
+                        available: node.available + node.used,
+                    };
+                    new_map.insert(pos, source);
+
+                    let next = State {
+                        goal: if self.goal == pos { n_pos } else { self.goal },
+                        nodes_map: new_map,
+                    };
+                    result.push((next, 1000));
+                }
+            }
+        }
+        result
+    }
+}
+
+impl Hash for State {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.goal.hash(state);
+        self.nodes_map.hash(state);
+    }
+}
+
+impl Eq for State {}
+
+impl PartialEq<Self> for State {
+    fn eq(&self, other: &Self) -> bool {
+        self.nodes_map.iter().all(|(pos, node)| other.nodes_map.get(pos).unwrap() == node) && self.goal == other.goal
+    }
+}
+
+impl PartialEq for Node {
+    fn eq(&self, other: &Self) -> bool {
+        (self.x, self.y) == (other.x, other.y)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn part1_input() {
+        let nodes = parse_file(include_str!("input/day22_bak.txt"));
+        assert_eq!(937, part1(nodes));
+    }
+
+    #[test]
+    fn part2_sample() {
+        let nodes = parse_file(include_str!("input/day22_sample.txt"));
+        assert_eq!(7, part2(nodes));
+    }
+}
