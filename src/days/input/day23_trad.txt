@@ -1,0 +1,26 @@
+b = a
+b--
+d = a
+a = 0
+{   c = b
+    {   a++
+        c--
+    } while c != 0 // a += b
+    d--
+} while d != 0 // a = b * d = a * (a - 1) => a = 12 * 11 = 132
+b--
+c = b
+d = c
+{   d--
+    c++
+} while d != 0 // c = 2 * b = 2 * (a - 2) => c = 20
+tgl c
+cpy -16 c
+jnz 1 c => jump to 3
+jnz 86 c
+{   jnz 77 d
+    {   a++
+        d++
+    } while d != 0
+    c++
+} while c != 0 => a += c * -d
